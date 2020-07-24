@@ -1,84 +1,41 @@
-let minhaPromise = function () {
-    return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://api.github.com/users/zJhol');
-        xhr.send(null);
+let listElement = document.querySelector('#app ul');
+var inputElement = document.querySelector('#app input');
 
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    resolve((JSON.parse(xhr.responseText)));
-                }
-                else
-                    reject('Erro na requisição');
-            }
+function searchUser() {
+    // O Axios encapsula o XMLHttpRequest
+    let user = inputElement.value;
+    if (user.length === 0)
+        alert('Digite um usuário válido do GitHub!');
+    else {
+        renderList();
+        axios.get(`https://api.github.com/user/${user}/repos`)
+            .then(function (response) {
+                renderList(response.data);
+            })
+            .catch(function (error) {
+                listElement.innerHTML = '';
+                if (error.message.includes('404'))
+                    alert('Usuário não existe!');
+            });
+    }
+}
+
+function renderList(data) {
+    listElement.innerHTML = '';
+    if (data) {
+        for (repo of data) {
+            var repoElement = document.createElement('li');
+            var repoText = document.createTextNode(repo['name']);
+
+            repoElement.appendChild(repoText);
+            listElement.appendChild(repoElement);
         }
-    });
-}
+    }
+    else {
+        var repoElement = document.createElement('li');
+        var repoText = document.createTextNode('Carregando...');
 
-minhaPromise()
-    .then(function (response) {
-        console.log(response);
-    })
-    .catch(function (error) {
-        console.warn(error);
-    });
-
-// O Axios encapsula o XMLHttpRequest
-axios.get('https://api.github.com/users/zJhol')
-    .then(function (response) {
-        console.log(response);
-    })
-    .catch(function (error) {
-        console.warn(error);
-    });
-
-let promise = new Promise((resolve, reject) => {
-    // Opening a file
-    let isOpened = true;
-    if (isOpened)
-        resolve("Opened");
-    reject("Not Opened");
-});
-promise.then((fromResolve) => {
-    console.log(fromResolve);
-}).catch((fromReject) => {
-    console.log(fromReject);
-});
-
-function openFile() {
-    return new Promise((resolve, reject) => {
-        // Opening the file
-        let isOpened = true;
-        if (isOpened)
-            resolve("Opened");
-        reject("Not Opened");
-    });
+        repoElement.appendChild(repoText);
+        listElement.appendChild(repoElement);
+    }
 }
-function readFile() {
-    return new Promise((resolve, reject) => {
-        // Reading the file
-        let isRead = true;
-        if (isRead)
-            resolve("Read");
-        reject("Not read");
-    });
-}
-function deleteFile() {
-    return new Promise((resolve, reject) => {
-        // Deleting the file
-        let isDeleted = true;
-        if (isDeleted)
-            resolve("Deleted");
-        reject("Not deleted");
-    });
-}
-openFile()
-    .then(() => readFile()
-        .then(() => deleteFile()
-            .then(() => console.log("Everything done"))
-            .catch((frj) => console.log(frj)))
-        .catch((frj) => console.log(frj)))
-    .catch((frj) => console.log(frj));
-Promise.all([openFile(), readFile(), deleteFile()]).then().catch();
-Promise.race([openFile(), readFile(), deleteFile()]).then().catch();
