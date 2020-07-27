@@ -8,7 +8,7 @@ function searchUser() {
         alert('Digite um usuário válido do GitHub!');
     else {
         renderList();
-        axios.get(`https://api.github.com/user/${user}/repos`)
+        axios.get(`https://api.github.com/users/${user}/repos`)
             .then(function (response) {
                 renderList(response.data);
             })
